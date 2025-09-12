@@ -9,7 +9,7 @@ bindings = [
 
 [[migrations]]
 tag = "v1"
-new_sqlite_classes = ["RoomDO"]
+new_classes = ["RoomDO"]
 
 [placement]
 mode = "smart"
@@ -17,4 +17,4 @@ mode = "smart"
 [vars]
 # Comma-separated list of allowed viewer origins (e.g., your Pages URL)
 # Example: "https://radar.lucrepostando.online,https://yourapp.pages.dev"
-ALLOWED_ORIGINS = ""
+ALLOWED_ORIGINS = "https://radar.lucrepostando.online,https://cs2map-webapp.pages.dev"
