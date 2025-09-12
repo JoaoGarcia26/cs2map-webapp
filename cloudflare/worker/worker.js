@@ -38,12 +38,18 @@ export default {
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair);
 
-    // Hand off the server end to the Durable Object for this room
-    await obj.fetch(`https://do${WS_PATH}?role=${role}&room=${encodeURIComponent(room)}&t=${encodeURIComponent(token)}`, {
-      method: "POST",
-      headers: { Upgrade: "websocket" },
-      webSocket: server,
-    });
+    // Hand off the server end to the Durable Object for this room with explicit WS upgrade
+    const doUrl = `https://do${WS_PATH}?role=${role}&room=${encodeURIComponent(room)}&t=${encodeURIComponent(token)}`;
+    try {
+      await obj.fetch(doUrl, {
+        method: "GET",
+        headers: { Upgrade: "websocket" },
+        webSocket: server,
+      });
+    } catch (e) {
+      try { server.close(1011, "do error"); } catch {}
+      return new Response("do error", { status: 500 });
+    }
 
     return new Response(null, { status: 101, webSocket: client });
   },
@@ -112,4 +118,3 @@ export class RoomDO {
     }
   }
 }
-
