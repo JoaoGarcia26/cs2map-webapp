@@ -20,8 +20,19 @@ const ENV_WS_URL = import.meta.env.VITE_WS_URL; // e.g. wss://relay.example.com
 const ENV_WS_PATH = import.meta.env.VITE_WS_PATH || "/cs2_webradar";
 
 const normalizeBase = (s) => (s || "").replace(/\/$/, "");
+const getRelayFromLocation = () => {
+  const params = new URLSearchParams(window.location.search);
+  const relay = params.get("relay")?.trim();
+  if (!relay) return undefined;
+  if (/^wss?:\/\//i.test(relay)) return normalizeBase(relay);
+  return normalizeBase(`ws://${relay}`);
+};
+
 const buildWsUrl = (room, token) => {
-  const base = ENV_WS_URL
+  const override = getRelayFromLocation();
+  const base = override
+    ? override
+    : ENV_WS_URL
     ? normalizeBase(ENV_WS_URL)
     : `ws://${USE_LOCALHOST ? "localhost" : EFFECTIVE_IP}:${PORT}`;
   const path = ENV_WS_PATH.startsWith("/") ? ENV_WS_PATH : `/${ENV_WS_PATH}`;
