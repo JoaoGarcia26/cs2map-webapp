@@ -91,21 +91,22 @@ bool main()
     LOG_INFO("connected to the web socket ('%s')", formatted_address.data());
 
     // Construct a shareable link for the viewer
+    const auto relay_url = std::format("ws://{}:{}{}", relay_host, relay_port, relay_path);
     auto build_share_link = [&]() -> std::string {
         if (!config_data.m_ui_base.empty())
         {
             std::string base = config_data.m_ui_base;
             if (base.back() == '/') base.pop_back();
-            return std::format("{}/r/{}?t={}", base, room_id, token);
+            return std::format("{}/r/{}?t={}&relay={}", base, room_id, token, relay_url);
         }
         const bool is_local = (ipv4_address == "localhost");
         if (is_local)
-            return std::format("http://localhost:5173/r/{}?t={}", room_id, token);
+            return std::format("http://localhost:5173/r/{}?t={}&relay={}", room_id, token, relay_url);
         // Heuristic: domains -> https, raw IP -> http with dev port
         const bool has_alpha = std::regex_search(ipv4_address, std::regex("[A-Za-z]"));
         if (has_alpha)
-            return std::format("https://{}/r/{}?t={}", ipv4_address, room_id, token);
-        return std::format("http://{}:5173/r/{}?t={}", ipv4_address, room_id, token);
+            return std::format("https://{}/r/{}?t={}&relay={}", ipv4_address, room_id, token, relay_url);
+        return std::format("http://{}:5173/r/{}?t={}&relay={}", ipv4_address, room_id, token, relay_url);
     };
     const auto share_link = build_share_link();
     LOG_INFO("share this link with viewers: %s", share_link.c_str());
