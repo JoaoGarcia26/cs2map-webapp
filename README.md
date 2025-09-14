@@ -24,6 +24,18 @@ npm run build
 pm2 start server.js --name cs2-webradar
 ```
 
+If your WebSocket relay runs on another host, set `VITE_WS_URL` before building:
+
+```bash
+VITE_WS_URL=ws://relay.example.com:22006 npm run build
+```
+
+Alternatively, viewer links accept a `relay` query parameter pointing to the relay URL:
+
+```
+http://your.domain/r/<room>?t=<token>&relay=ws://relay.example.com:22006
+```
+
 ## WebSocket Relay
 
 The WebSocket relay can be started separately:

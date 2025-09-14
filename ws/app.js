@@ -35,11 +35,7 @@ const getOrCreateRoom = (roomId) => {
 
 // Keep connections healthy
 const HEARTBEAT_MS = 15000;
-function heartbeat() { this.isAlive = true; }
 wss.on("connection", (ws, request) => {
-  ws.isAlive = true;
-  ws.on("pong", heartbeat);
-
   const { query } = url.parse(request.url, true);
   const role = (query.role === "producer" ? "producer" : "viewer");
   const roomId = typeof query.room === "string" && query.room.trim().length > 0 ? query.room.trim() : "default";
@@ -103,11 +99,12 @@ wss.on("connection", (ws, request) => {
   });
 });
 
-// Ping/pong keepalive
+// Periodic ping to keep connections alive without forcing client pong
 setInterval(() => {
   wss.clients.forEach((ws) => {
-    if (ws.isAlive === false) return ws.terminate();
-    ws.isAlive = false; ws.ping();
+    if (ws.readyState === 1) {
+      try { ws.ping(); } catch (_) {}
+    }
   });
 }, HEARTBEAT_MS);
 
