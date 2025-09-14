@@ -1,8 +1,33 @@
-# React + Vite
+# CS2 WebRadar
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Front-end React application for CS2 WebRadar with Vite.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm run dev
+```
+
+## Production
+
+Build the static assets and serve them with the built-in Express server, which handles dynamic room links such as `/r/<room>`:
+
+```bash
+npm run build
+npm run start
+```
+
+The server listens on `PORT` (defaults to `8080`). For process management in production you can use [PM2](https://pm2.keymetrics.io/):
+
+```bash
+npm run build
+pm2 start server.js --name cs2-webradar
+```
+
+## WebSocket Relay
+
+The WebSocket relay can be started separately:
+
+```bash
+npm run relay:pm2
+```
