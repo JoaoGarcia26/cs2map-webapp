@@ -43,55 +43,75 @@ wss.on("connection", (ws, request) => {
 
   const clientAddress = request.socket.remoteAddress?.replace("::ffff:", "") || "unknown";
   const room = getOrCreateRoom(roomId);
-
   // Optional origin allowlist for viewers (comma-separated)
   const allowed = (process.env.ALLOWED_ORIGINS || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
   const origin = request.headers?.origin;
+  console.info(
+    `[ws] handshake ${clientAddress} role=${role} room=${roomId} token=${token ? "provided" : "none"} origin=${origin || "none"}`
+  );
   if (role === "viewer" && allowed.length && origin && !allowed.includes(origin)) {
+    console.warn(`[ws] rejecting viewer from origin ${origin}`);
     ws.close(1008, "origin not allowed");
     return;
   }
 
   // Optional token gate: if a token is set for the room, enforce it
   if (room.token && token !== room.token) {
+    console.warn(`[ws] invalid token for room ${roomId}`);
     ws.close(1008, "invalid token");
     return;
   }
   // First token wins if provided by the first producer
   if (!room.token && role === "producer" && token) {
     room.token = token;
+    console.info(`[ws] token set for room ${roomId}`);
   }
 
   if (role === "producer") room.producers.add(ws); else room.viewers.add(ws);
-  console.info(`[ws] ${clientAddress} connected role=${role} room=${roomId}`);
+  console.info(
+    `[ws] ${clientAddress} connected role=${role} room=${roomId} viewers=${room.viewers.size} producers=${room.producers.size}`
+  );
 
   ws.on("message", (data) => {
-    if (role !== "producer") return; // only producers broadcast
+    if (role !== "producer") {
+      console.warn(`[ws] message from viewer ignored room=${roomId}`);
+      return; // only producers broadcast
+    }
 
     const now = Date.now();
     // Throttle to ~30fps per room
-    if (now - room.lastBroadcast < 33) return;
+    if (now - room.lastBroadcast < 33) {
+      console.debug(`[ws] broadcast throttled room=${roomId}`);
+      return;
+    }
     room.lastBroadcast = now;
 
+    console.debug(
+      `[ws] broadcasting ${data.length || 0} bytes to ${room.viewers.size} viewers room=${roomId}`
+    );
     // Fanout to viewers only
     room.viewers.forEach((client) => {
       if (client.readyState === 1) {
-        try { client.send(data); } catch (_) {}
+        try { client.send(data); } catch (err) {
+          console.error(`[ws] send error room=${roomId}`, err);
+        }
       }
     });
   });
 
-  ws.on("close", () => {
+  ws.on("close", (code, reason) => {
     room.viewers.delete(ws);
     room.producers.delete(ws);
     // If room is empty, clean up
     if (room.viewers.size === 0 && room.producers.size === 0) {
       rooms.delete(roomId);
     }
-    console.info(`[ws] ${clientAddress} disconnected role=${role} room=${roomId}`);
+    console.info(
+      `[ws] ${clientAddress} disconnected role=${role} room=${roomId} code=${code} reason=${reason}`
+    );
   });
 
   ws.on("error", (err) => {
@@ -101,9 +121,12 @@ wss.on("connection", (ws, request) => {
 
 // Periodic ping to keep connections alive without forcing client pong
 setInterval(() => {
+  console.debug(`[ws] heartbeat to ${wss.clients.size} clients`);
   wss.clients.forEach((ws) => {
     if (ws.readyState === 1) {
-      try { ws.ping(); } catch (_) {}
+      try { ws.ping(); } catch (_) {
+        console.error(`[ws] heartbeat ping error`, _);
+      }
     }
   });
 }, HEARTBEAT_MS);
