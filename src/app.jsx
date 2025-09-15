@@ -20,27 +20,35 @@ const ENV_WS_URL = import.meta.env.VITE_WS_URL; // e.g. wss://relay.example.com
 const ENV_WS_PATH = import.meta.env.VITE_WS_PATH || "/cs2_webradar";
 
 const normalizeBase = (s) => (s || "").replace(/\/$/, "");
+
+// Returns an object with { origin, path } if a relay override is present
 const getRelayFromLocation = () => {
   const params = new URLSearchParams(window.location.search);
   const relay = params.get("relay")?.trim();
   if (!relay) return undefined;
-  if (/^wss?:\/\//i.test(relay)) return normalizeBase(relay);
-  return normalizeBase(`ws://${relay}`);
+  try {
+    const url = new URL(relay);
+    return {
+      origin: normalizeBase(url.origin),
+      path: url.pathname && url.pathname !== "/" ? url.pathname : undefined,
+    };
+  } catch {
+    return { origin: normalizeBase(`ws://${relay}`) };
+  }
 };
 
 const buildWsUrl = (room, token) => {
   const override = getRelayFromLocation();
-  const base = override
-    ? override
-    : ENV_WS_URL
-    ? normalizeBase(ENV_WS_URL)
-    : `ws://${USE_LOCALHOST ? "localhost" : EFFECTIVE_IP}:${PORT}`;
-  const path = ENV_WS_PATH.startsWith("/") ? ENV_WS_PATH : `/${ENV_WS_PATH}`;
+  const origin = override?.origin
+    || (ENV_WS_URL ? normalizeBase(ENV_WS_URL)
+    : `ws://${USE_LOCALHOST ? "localhost" : EFFECTIVE_IP}:${PORT}`);
+  const path = override?.path
+    || (ENV_WS_PATH.startsWith("/") ? ENV_WS_PATH : `/${ENV_WS_PATH}`);
   const q = new URLSearchParams({ role: "viewer", room: room || "default" });
   if (token) q.set("t", token);
-  const full = `${base}${path}?${q.toString()}`;
+  const full = `${origin}${path}?${q.toString()}`;
   console.debug(
-    `buildWsUrl room=${room} token=${token ? "yes" : "no"} override=${override || "none"} -> ${full}`
+    `buildWsUrl room=${room} token=${token ? "yes" : "no"} override=${override ? `${override.origin}${override.path || ""}` : "none"} -> ${full}`
   );
   return full;
 };
@@ -227,7 +235,7 @@ const App = () => {
           )) || (
               <div id="radar" className={`relative overflow-hidden origin-center`}>
                 <h1 className="radar_message">
-                  Connected! Waiting for data from usermode
+                  Connected! Waiting for data from usermode 01
                 </h1>
               </div>
             )}
