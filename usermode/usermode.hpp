@@ -27,6 +27,7 @@
 #include "utils/exception.hpp"
 #include "utils/address.hpp"
 #include "utils/memory.hpp"
+#include "utils/auth.hpp"
 
 /* core */
 #include "core/interfaces.hpp"
