@@ -13,6 +13,7 @@ app.use((req, _res, next) => {
   console.info(`[http] ${req.method} ${req.url}`);
   next();
 });
+
 app.use(express.static(distPath));
 app.get('*', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
