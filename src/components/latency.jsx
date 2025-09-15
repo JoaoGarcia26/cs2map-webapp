@@ -31,7 +31,7 @@ export const Latency = ({ value, settings, setSettings }) => {
   return (
     <div className={`flex gap-2 absolute text-[normal] right-2.5 top-2.5`}>
       <div className={'flex gap-1'}>
-        <img className={`w-[1.3rem]`} src={`./assets/icons/gauge.svg`} />
+        <img className={`w-[1.3rem]`} src={`/assets/icons/gauge.svg`} />
         <span>{value.toFixed(0)}ms</span>
       </div>
 

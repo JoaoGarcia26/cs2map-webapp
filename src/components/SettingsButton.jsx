@@ -9,7 +9,7 @@ const SettingsButton = ({ settings, onSettingsChange }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1 transition-all rounded-xl"
       >
-        <img className={`w-[1.3rem]`} src={`./assets/icons/cog.svg`} />
+        <img className={`w-[1.3rem]`} src={`/assets/icons/cog.svg`} />
         <span className="text-radar-primary">Settings</span>
       </button>
 

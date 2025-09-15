@@ -20,14 +20,37 @@ const ENV_WS_URL = import.meta.env.VITE_WS_URL; // e.g. wss://relay.example.com
 const ENV_WS_PATH = import.meta.env.VITE_WS_PATH || "/cs2_webradar";
 
 const normalizeBase = (s) => (s || "").replace(/\/$/, "");
+
+// Returns an object with { origin, path } if a relay override is present
+const getRelayFromLocation = () => {
+  const params = new URLSearchParams(window.location.search);
+  const relay = params.get("relay")?.trim();
+  if (!relay) return undefined;
+  try {
+    const url = new URL(relay);
+    return {
+      origin: normalizeBase(url.origin),
+      path: url.pathname && url.pathname !== "/" ? url.pathname : undefined,
+    };
+  } catch {
+    return { origin: normalizeBase(`ws://${relay}`) };
+  }
+};
+
 const buildWsUrl = (room, token) => {
-  const base = ENV_WS_URL
-    ? normalizeBase(ENV_WS_URL)
-    : `ws://${USE_LOCALHOST ? "localhost" : EFFECTIVE_IP}:${PORT}`;
-  const path = ENV_WS_PATH.startsWith("/") ? ENV_WS_PATH : `/${ENV_WS_PATH}`;
+  const override = getRelayFromLocation();
+  const origin = override?.origin
+    || (ENV_WS_URL ? normalizeBase(ENV_WS_URL)
+    : `ws://${USE_LOCALHOST ? "localhost" : EFFECTIVE_IP}:${PORT}`);
+  const path = override?.path
+    || (ENV_WS_PATH.startsWith("/") ? ENV_WS_PATH : `/${ENV_WS_PATH}`);
   const q = new URLSearchParams({ role: "viewer", room: room || "default" });
   if (token) q.set("t", token);
-  return `${base}${path}?${q.toString()}`;
+  const full = `${origin}${path}?${q.toString()}`;
+  console.debug(
+    `buildWsUrl room=${room} token=${token ? "yes" : "no"} override=${override ? `${override.origin}${override.path || ""}` : "none"} -> ${full}`
+  );
+  return full;
 };
 
 const getRoomFromLocation = () => {
@@ -78,9 +101,11 @@ const App = () => {
 
     const room = getRoomFromLocation();
     const token = getTokenFromLocation();
+    console.info(`viewer starting with room=${room} token=${token ? "yes" : "no"}`);
 
     const connect = () => {
       const webSocketURL = buildWsUrl(room, token);
+      console.info(`attempting websocket connection to ${webSocketURL}`);
       try {
         webSocket = new WebSocket(webSocketURL);
       } catch (error) {
@@ -90,6 +115,7 @@ const App = () => {
       }
 
       connectionTimeout = setTimeout(() => {
+        console.warn(`connection timeout after ${CONNECTION_TIMEOUT}ms`);
         try { webSocket?.close(); } catch {}
       }, CONNECTION_TIMEOUT);
 
@@ -99,9 +125,11 @@ const App = () => {
         console.info(`connected to the web socket: room=${room}`);
       };
 
-      webSocket.onclose = () => {
+      webSocket.onclose = (event) => {
         clearTimeout(connectionTimeout);
-        console.error("disconnected from the web socket");
+        console.warn(
+          `disconnected from the web socket code=${event.code} reason=${event.reason}`
+        );
         scheduleReconnect();
       };
 
@@ -112,6 +140,7 @@ const App = () => {
       };
 
       webSocket.onmessage = async (event) => {
+        console.debug(`received ${event.data?.size || event.data?.length || 0} bytes`);
         setAverageLatency(getLatency());
         const parsedData = JSON.parse(await event.data.text());
         setPlayerArray(parsedData.m_players);
@@ -120,22 +149,25 @@ const App = () => {
 
         const map = parsedData.m_map;
         if (map !== "invalid") {
+          console.info(`map updated to ${map}`);
           setMapData({
-            ...(await (await fetch(`data/${map}/data.json`)).json()),
+            ...(await (await fetch(`/data/${map}/data.json`)).json()),
             name: map,
           });
-          document.body.style.backgroundImage = `url(./data/${map}/background.png)`;
+          document.body.style.backgroundImage = `url(/data/${map}/background.png)`;
         }
       };
     };
 
     const scheduleReconnect = () => {
       const delay = Math.min(5000, 500 * Math.pow(2, retry++));
+      console.info(`reconnecting in ${delay}ms`);
       setTimeout(connect, delay);
     };
 
     connect();
     return () => {
+      console.info(`cleanup closing websocket`);
       try { clearTimeout(connectionTimeout); webSocket?.close(); } catch {}
     };
   }, []);
@@ -152,7 +184,7 @@ const App = () => {
           <div className={`absolute left-1/2 top-2 flex-col items-center gap-1 z-50`}>
             <div className={`flex justify-center items-center gap-1`}>
               <MaskedIcon
-                path={`./assets/icons/c4_sml.png`}
+                path={`/assets/icons/c4_sml.png`}
                 height={32}
                 color={
                   (bombData.m_is_defusing &&
@@ -191,11 +223,11 @@ const App = () => {
           </ul>
 
           {(playerArray.length > 0 && mapData && (
-            <Radar
-              playerArray={playerArray}
-              radarImage={`./data/${mapData.name}/radar.png`}
-              mapData={mapData}
-              localTeam={localTeam}
+              <Radar
+                playerArray={playerArray}
+                radarImage={`/data/${mapData.name}/radar.png`}
+                mapData={mapData}
+                localTeam={localTeam}
               averageLatency={averageLatency}
               bombData={bombData}
               settings={settings}
