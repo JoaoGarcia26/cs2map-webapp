@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "auth.hpp"
+#include <wincred.h>
 
 namespace auth
 {
@@ -11,16 +12,59 @@ namespace auth
         return total;
     }
 
-    bool login(const std::string& username, const std::string& password)
+    static bool prompt_credentials(std::string& email, std::string& password)
     {
+        CREDUI_INFOA info = {};
+        info.cbSize = sizeof(info);
+        info.pszCaptionText = "Firebase Login";
+        info.pszMessageText = "Enter your email and password";
+
+        char user[CREDUI_MAX_USERNAME_LENGTH] = "";
+        char pass[CREDUI_MAX_PASSWORD_LENGTH] = "";
+        BOOL save = FALSE;
+
+        const auto res = CredUIPromptForCredentialsA(
+            &info,
+            "firebase",
+            nullptr,
+            0,
+            user,
+            CREDUI_MAX_USERNAME_LENGTH,
+            pass,
+            CREDUI_MAX_PASSWORD_LENGTH,
+            &save,
+            CREDUI_FLAGS_GENERIC_CREDENTIALS |
+                CREDUI_FLAGS_ALWAYS_SHOW_UI |
+                CREDUI_FLAGS_DO_NOT_PERSIST);
+        if (res != NO_ERROR)
+            return false;
+
+        email = user;
+        password = pass;
+        SecureZeroMemory(pass, sizeof(pass));
+        return true;
+    }
+
+    bool login(const std::string& api_key)
+    {
+        std::string email, password;
+        if (!prompt_credentials(email, password))
+            return false;
         CURL* curl = curl_easy_init();
         if (!curl)
             return false;
 
         std::string response;
-        const std::string payload = nlohmann::json{{"username", username}, {"password", password}}.dump();
+        const auto payload = nlohmann::json{
+            {"email", email},
+            {"password", password},
+            {"returnSecureToken", true}
+        }.dump();
+        const auto url = std::format(
+            "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={}",
+            api_key);
 
-        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8080/api/login");
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
         struct curl_slist* headers = nullptr;
@@ -37,7 +81,7 @@ namespace auth
         try
         {
             const auto json = nlohmann::json::parse(response);
-            return json.contains("token");
+            return json.contains("idToken");
         }
         catch (...)
         {

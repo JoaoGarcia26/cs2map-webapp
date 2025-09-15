@@ -11,6 +11,7 @@
 #include <regex>
 #include <thread>
 #include <winternl.h>
+#include <format>
 
 /* ext/includes */
 #include "ext/nlohmann/json.hpp"

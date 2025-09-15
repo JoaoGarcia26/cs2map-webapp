@@ -18,7 +18,6 @@ app.use((req, _res, next) => {
 app.use(express.json());
 
 const licenses = new Set();
-const users = new Map([["admin", "password"]]);
 
 app.get('/api/licenses', (_req, res) => {
   res.json({ licenses: Array.from(licenses) });
@@ -31,19 +30,6 @@ app.post('/api/licenses', (req, res) => {
   }
   licenses.add(key);
   res.status(201).json({ key });
-});
-
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) {
-    return res.status(400).json({ error: 'missing credentials' });
-  }
-  const expected = users.get(username);
-  if (expected && expected === password) {
-    const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
-    return res.json({ token });
-  }
-  res.status(401).json({ error: 'invalid credentials' });
 });
 
 app.delete('/api/licenses/:key', (req, res) => {

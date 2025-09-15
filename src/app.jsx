@@ -1,5 +1,6 @@
-import ReactDOM from "react-dom/client";
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase";
 import "./app.css";
 import PlayerCard from "./components/PlayerCard";
 import Radar from "./components/Radar";
@@ -7,6 +8,8 @@ import { getLatency, Latency } from "./components/latency";
 import MaskedIcon from "./components/maskedicon";
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
+import Login from "./components/Login";
+import MainDashboard from "./components/MainDashboard";
 
 const CONNECTION_TIMEOUT = 5000;
 
@@ -82,13 +85,8 @@ const loadSettings = () => {
   return savedSettings ? JSON.parse(savedSettings) : DEFAULT_SETTINGS;
 };
 
-const App = () => {
-  if (window.location.pathname.startsWith("/admin")) {
-    return <AdminDashboard />;
-  }
-  if (window.location.pathname.startsWith("/user")) {
-    return <UserDashboard />;
-  }
+
+const ViewerApp = () => {
 
   const [averageLatency, setAverageLatency] = useState(0);
   const [playerArray, setPlayerArray] = useState([]);
@@ -96,7 +94,6 @@ const App = () => {
   const [localTeam, setLocalTeam] = useState();
   const [bombData, setBombData] = useState();
   const [settings, setSettings] = useState(loadSettings());
-  const [bannerOpened, setBannerOpened] = useState(true)
 
   // Save settings to local storage whenever they change
   useEffect(() => {
@@ -125,7 +122,7 @@ const App = () => {
 
       connectionTimeout = setTimeout(() => {
         console.warn(`connection timeout after ${CONNECTION_TIMEOUT}ms`);
-        try { webSocket?.close(); } catch {}
+        try { webSocket?.close(); } catch { /* ignore */ }
       }, CONNECTION_TIMEOUT);
 
       webSocket.onopen = () => {
@@ -177,7 +174,7 @@ const App = () => {
     connect();
     return () => {
       console.info(`cleanup closing websocket`);
-      try { clearTimeout(connectionTimeout); webSocket?.close(); } catch {}
+      try { clearTimeout(connectionTimeout); webSocket?.close(); } catch { /* ignore */ }
     };
   }, []);
 
@@ -268,6 +265,19 @@ const App = () => {
       </div>
     </div>
   );
+};
+
+const App = () => {
+  const [user, setUser] = useState(auth.currentUser);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, setUser);
+    return () => unsub();
+  }, []);
+  const path = window.location.pathname;
+  if (path.startsWith("/admin")) return <AdminDashboard />;
+  if (path.startsWith("/user")) return <UserDashboard />;
+  if (path.startsWith("/r")) return <ViewerApp />;
+  return user ? <MainDashboard /> : <Login onLogin={() => window.location.reload()} />;
 };
 
 export default App;

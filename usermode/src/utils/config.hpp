@@ -8,6 +8,9 @@ struct config_data_t
     std::string m_username{};
     std::string m_password{};
 
+    // Firebase
+    std::string m_firebase_api_key{};
+
     // Optional (production): separate relay and UI configuration
     std::string m_ui_base{};     // e.g. https://seuapp.netlify.app
     std::string m_relay_host{};  // e.g. relay.seudominio.com or IP

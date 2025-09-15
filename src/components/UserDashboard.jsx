@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
 const UserDashboard = () => {
   const [token, setToken] = useState(localStorage.getItem("authToken") || "");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState(false);
   const [license, setLicense] = useState(localStorage.getItem("licenseKey") || "");
@@ -34,21 +36,13 @@ const UserDashboard = () => {
   const login = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-        setToken(data.token);
-        setUsername("");
-        setPassword("");
-        setLoginError(false);
-      } else {
-        setLoginError(true);
-      }
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const t = await cred.user.getIdToken();
+      localStorage.setItem("authToken", t);
+      setToken(t);
+      setEmail("");
+      setPassword("");
+      setLoginError(false);
     } catch (err) {
       console.error("login failed", err);
       setLoginError(true);
@@ -57,6 +51,7 @@ const UserDashboard = () => {
 
   const logout = () => {
     localStorage.removeItem("authToken");
+    signOut(auth).catch(() => {});
     setToken("");
   };
 
@@ -73,9 +68,9 @@ const UserDashboard = () => {
         <form onSubmit={login} className="flex flex-col">
           <input
             className="border p-2 mb-4 rounded"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
           />
           <input
             type="password"
