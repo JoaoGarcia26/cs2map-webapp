@@ -11,6 +11,7 @@
 #include <regex>
 #include <thread>
 #include <winternl.h>
+#include <format>
 
 /* ext/includes */
 #include "ext/nlohmann/json.hpp"
@@ -27,6 +28,7 @@
 #include "utils/exception.hpp"
 #include "utils/address.hpp"
 #include "utils/memory.hpp"
+#include "utils/auth.hpp"
 
 /* core */
 #include "core/interfaces.hpp"

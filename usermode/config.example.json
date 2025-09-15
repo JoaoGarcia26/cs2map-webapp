@@ -1,0 +1,10 @@
+{
+  "m_use_localhost": true,
+  "m_local_ip": "192.168.0.100",
+  "m_public_ip": "radar.lucrepostando.online",
+  "m_firebase_api_key": "YOUR_FIREBASE_API_KEY",
+  "m_ui_base": "http://radar.lucrepostando.online",
+  "m_relay_host": "relay.seudominio.com",
+  "m_relay_port": 22006,
+  "m_relay_path": "/cs2_webradar"
+}

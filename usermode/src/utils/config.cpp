@@ -36,6 +36,7 @@ bool cfg::setup(config_data_t& config_data)
     "m_use_localhost": true,
     "m_local_ip": "192.168.x.x",
     "m_public_ip": "x.x.x.x",
+    "m_firebase_api_key": "YOUR_FIREBASE_API_KEY",
     "m_ui_base": "https://seuapp.netlify.app",
     "m_relay_host": "relay.seudominio.com",
     "m_relay_port": 22006,
@@ -57,6 +58,7 @@ bool cfg::setup(config_data_t& config_data)
         config_data.m_use_localhost = json_get_bool(parsed_data, "m_use_localhost", true);
         config_data.m_local_ip      = json_get_string(parsed_data, "m_local_ip");
         config_data.m_public_ip     = json_get_string(parsed_data, "m_public_ip");
+        config_data.m_firebase_api_key = json_get_string(parsed_data, "m_firebase_api_key");
 
         // Optional production fields
         config_data.m_ui_base    = json_get_string(parsed_data, "m_ui_base");
