@@ -5,6 +5,8 @@ struct config_data_t
     bool m_use_localhost{};
     std::string m_local_ip{};
     std::string m_public_ip{}; // may be domain or IP
+    std::string m_username{};
+    std::string m_password{};
 
     // Firebase
     std::string m_firebase_api_key{};

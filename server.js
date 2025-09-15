@@ -32,7 +32,6 @@ app.post('/api/licenses', (req, res) => {
   res.status(201).json({ key });
 });
 
-
 app.delete('/api/licenses/:key', (req, res) => {
   const { key } = req.params;
   if (licenses.delete(key)) {

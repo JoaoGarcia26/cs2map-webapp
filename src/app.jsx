@@ -85,7 +85,9 @@ const loadSettings = () => {
   return savedSettings ? JSON.parse(savedSettings) : DEFAULT_SETTINGS;
 };
 
+
 const ViewerApp = () => {
+
   const [averageLatency, setAverageLatency] = useState(0);
   const [playerArray, setPlayerArray] = useState([]);
   const [mapData, setMapData] = useState();

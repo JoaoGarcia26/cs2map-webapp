@@ -50,7 +50,6 @@ namespace auth
         std::string email, password;
         if (!prompt_credentials(email, password))
             return false;
-
         CURL* curl = curl_easy_init();
         if (!curl)
             return false;
