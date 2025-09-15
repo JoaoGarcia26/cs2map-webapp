@@ -33,7 +33,7 @@ const Bomb = ({ bombData, mapData, radarImage, localTeam, averageLatency, settin
           (localTeam == teamEnum.counterTerrorist && `#6492b4`) ||
           `#c90b0b`
         }`,
-        WebkitMask: `url('./assets/icons/c4_sml.png') no-repeat center / contain`,
+        WebkitMask: `url('/assets/icons/c4_sml.png') no-repeat center / contain`,
         opacity: `1`,
         zIndex: `1`,
       }}

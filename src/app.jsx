@@ -151,10 +151,10 @@ const App = () => {
         if (map !== "invalid") {
           console.info(`map updated to ${map}`);
           setMapData({
-            ...(await (await fetch(`data/${map}/data.json`)).json()),
+            ...(await (await fetch(`/data/${map}/data.json`)).json()),
             name: map,
           });
-          document.body.style.backgroundImage = `url(./data/${map}/background.png)`;
+          document.body.style.backgroundImage = `url(/data/${map}/background.png)`;
         }
       };
     };
@@ -184,7 +184,7 @@ const App = () => {
           <div className={`absolute left-1/2 top-2 flex-col items-center gap-1 z-50`}>
             <div className={`flex justify-center items-center gap-1`}>
               <MaskedIcon
-                path={`./assets/icons/c4_sml.png`}
+                path={`/assets/icons/c4_sml.png`}
                 height={32}
                 color={
                   (bombData.m_is_defusing &&
@@ -223,11 +223,11 @@ const App = () => {
           </ul>
 
           {(playerArray.length > 0 && mapData && (
-            <Radar
-              playerArray={playerArray}
-              radarImage={`./data/${mapData.name}/radar.png`}
-              mapData={mapData}
-              localTeam={localTeam}
+              <Radar
+                playerArray={playerArray}
+                radarImage={`/data/${mapData.name}/radar.png`}
+                mapData={mapData}
+                localTeam={localTeam}
               averageLatency={averageLatency}
               bombData={bombData}
               settings={settings}

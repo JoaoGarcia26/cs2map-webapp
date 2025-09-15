@@ -40,7 +40,7 @@ const PlayerCard = ({ playerData, isOnRightSide, settings }) => {
         ></div>
         <img
           className={`h-[8rem] ${isOnRightSide && `scale-x-[-1]`}`}
-          src={`./assets/characters/${modelName}.png`}
+          src={`/assets/characters/${modelName}.png`}
         ></img>
       </div>
 
@@ -58,7 +58,7 @@ const PlayerCard = ({ playerData, isOnRightSide, settings }) => {
         <div className={`flex ${isOnRightSide && `flex-row-reverse`} gap-2`}>
           <div className="flex gap-[4px] items-center">
             <MaskedIcon
-              path={`./assets/icons/health.svg`}
+              path={`/assets/icons/health.svg`}
               height={16}
               color={`bg-radar-secondary`}
             />
@@ -67,7 +67,7 @@ const PlayerCard = ({ playerData, isOnRightSide, settings }) => {
 
           <div className="flex gap-[4px] items-center">
             <MaskedIcon
-              path={`./assets/icons/${
+              path={`/assets/icons/${
                 (playerData.m_has_helmet && `kevlar_helmet`) || `kevlar`
               }.svg`}
               height={16}
@@ -80,7 +80,7 @@ const PlayerCard = ({ playerData, isOnRightSide, settings }) => {
         <div className={`flex ${isOnRightSide && `flex-row-reverse`} gap-3`}>
           {playerData.m_weapons && playerData.m_weapons.m_primary && (
             <MaskedIcon
-              path={`./assets/icons/${playerData.m_weapons.m_primary}.svg`}
+              path={`/assets/icons/${playerData.m_weapons.m_primary}.svg`}
               height={28}
               color={`${
                 (playerData.m_weapons.m_active ==
@@ -93,7 +93,7 @@ const PlayerCard = ({ playerData, isOnRightSide, settings }) => {
 
           {playerData.m_weapons && playerData.m_weapons.m_secondary && (
             <MaskedIcon
-              path={`./assets/icons/${playerData.m_weapons.m_secondary}.svg`}
+              path={`/assets/icons/${playerData.m_weapons.m_secondary}.svg`}
               height={28}
               color={`${
                 (playerData.m_weapons.m_active ==
@@ -109,7 +109,7 @@ const PlayerCard = ({ playerData, isOnRightSide, settings }) => {
             playerData.m_weapons.m_melee.map((melee) => (
               <MaskedIcon
                 key={melee}
-                path={`./assets/icons/${melee}.svg`}
+                path={`/assets/icons/${melee}.svg`}
                 height={28}
                 color={`${
                   (playerData.m_weapons.m_active == melee &&
@@ -131,7 +131,7 @@ const PlayerCard = ({ playerData, isOnRightSide, settings }) => {
               playerData.m_weapons.m_utilities.map((utility) => (
                 <MaskedIcon
                   key={utility}
-                  path={`./assets/icons/${utility}.svg`}
+                  path={`/assets/icons/${utility}.svg`}
                   height={28}
                   color={`${
                     (playerData.m_weapons.m_active == utility &&
@@ -162,23 +162,23 @@ const PlayerCard = ({ playerData, isOnRightSide, settings }) => {
             {(playerData.m_team == teamEnum.counterTerrorist &&
               playerData.m_has_defuser && (
                 <MaskedIcon
-                  path={`./assets/icons/defuser.svg`}
+                  path={`/assets/icons/defuser.svg`}
                   height={28}
                   color={`bg-radar-secondary`}
                 />
               )) ||
               (playerData.m_team == teamEnum.terrorist &&
                 playerData.m_has_bomb && (
-                  <MaskedIcon
-                    path={`./assets/icons/c4.svg`}
-                    height={28}
-                    color={
-                      ((playerData.m_weapons &&
-                        playerData.m_weapons.m_active) == `c4` &&
-                        `bg-radar-primary`) ||
-                      `bg-radar-secondary`
-                    }
-                  />
+                    <MaskedIcon
+                      path={`/assets/icons/c4.svg`}
+                      height={28}
+                      color={
+                        ((playerData.m_weapons &&
+                          playerData.m_weapons.m_active) == `c4` &&
+                          `bg-radar-primary`) ||
+                        `bg-radar-secondary`
+                      }
+                    />
                 ))}
           </div>
         </div>

@@ -57,7 +57,7 @@ const Player = ({ playerData, mapData, radarImage, localTeam, averageLatency, se
         transform: `translate(${radarImageTranslation.x}px, ${radarImageTranslation.y}px)`,
         transition: `transform ${averageLatency}ms linear`,
         zIndex: `${(playerData.m_is_dead && `0`) || `1`}`,
-        WebkitMask: `${(playerData.m_is_dead && `url('./assets/icons/icon-enemy-death_png.png') no-repeat center / contain`) || `none`}`,
+        WebkitMask: `${(playerData.m_is_dead && `url('/assets/icons/icon-enemy-death_png.png') no-repeat center / contain`) || `none`}`,
       }}
     >
       {/* Name above the dot - outside rotation container */}
