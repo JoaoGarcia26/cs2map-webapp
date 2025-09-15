@@ -5,6 +5,8 @@ import PlayerCard from "./components/PlayerCard";
 import Radar from "./components/Radar";
 import { getLatency, Latency } from "./components/latency";
 import MaskedIcon from "./components/maskedicon";
+import AdminDashboard from "./components/AdminDashboard";
+import UserDashboard from "./components/UserDashboard";
 
 const CONNECTION_TIMEOUT = 5000;
 
@@ -81,6 +83,13 @@ const loadSettings = () => {
 };
 
 const App = () => {
+  if (window.location.pathname.startsWith("/admin")) {
+    return <AdminDashboard />;
+  }
+  if (window.location.pathname.startsWith("/user")) {
+    return <UserDashboard />;
+  }
+
   const [averageLatency, setAverageLatency] = useState(0);
   const [playerArray, setPlayerArray] = useState([]);
   const [mapData, setMapData] = useState();
