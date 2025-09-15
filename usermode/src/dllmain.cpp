@@ -14,6 +14,13 @@ bool main()
     }
     LOG_INFO("config system initialization completed");
 
+    if (!auth::login(config_data.m_username, config_data.m_password))
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        return {};
+    }
+    LOG_INFO("login completed");
+
     if (!exc::setup())
     {
         std::this_thread::sleep_for(std::chrono::seconds(5));
