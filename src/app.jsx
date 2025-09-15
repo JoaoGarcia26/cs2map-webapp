@@ -235,7 +235,7 @@ const App = () => {
           )) || (
               <div id="radar" className={`relative overflow-hidden origin-center`}>
                 <h1 className="radar_message">
-                  Connected! Waiting for data from usermode
+                  Connected! Waiting for data from usermode 01
                 </h1>
               </div>
             )}
